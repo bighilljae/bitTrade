@@ -35,3 +35,11 @@ function get_bid(){
         }
     });
 }
+
+function saveSetting(){
+    $.get('/save', {alarm: $('.alarm input').is(':checked'),
+        trade: $('.trade input').is(':checked'),
+        label: $('.label input').val()}, function(){
+        alert('저장이 완료되었습니다');
+    });
+}

@@ -1,18 +1,26 @@
-from flask import Flask, render_template, json
+from flask import Flask, render_template, json, request
 from coinone import Coinone
 from bithumb import Bithumb
 from korbit import Korbit
 from cpdax import Cpdax
+from alarm import Alarm
 import requests
 import datetime
 import os
 from auth import *
 
 app = Flask(__name__)
+bot = Alarm(5)
 api_bithumb = Bithumb(BITHUMB_KEY, BITHUMB_SECRET)
 api_korbit = Korbit(KORBIT_KEY, KORBIT_SECRET, KORBIT_USERNAME, KORBIT_PWD)
 api_cpdax = Cpdax(CPDAX_KEY, CPDAX_SECRET)
 api_coinone = Coinone(COINONE_KEY, COINONE_SECRET)
+
+app_settings = {
+    'alarm': True,
+    'trade': False,
+    'label': ''
+}
 
 @app.route('/hello/')
 def api_root():
@@ -57,9 +65,32 @@ def bid():
     for cur in list(u):
         if len(u[cur].keys()) < 2:
             del u[cur]
+            continue
+        if max(u[cur]) / min(u[cur]) > 1.006 and app_settings['alarm'] is True:
+            bot.add(cur, max(u[cur]) / min(u[cur]))
+    bot.message()
+
 
     writedata(market)
     return json.dumps(u)
+
+
+@app.route('/save')
+def saveSetting():
+    alrm = request.args.get('alarm', default=False, type=str)
+    if alrm == 'true':
+        app_settings['alarm'] = True
+    else:
+        app_settings['alarm'] = False
+    trade = request.args.get('trade', default=False, type=str)
+    if trade == 'true':
+        app_settings['trade'] = True
+    else:
+        app_settings['trade'] = False
+    label = request.args.get('label', default='', type=str)
+    app_settings['label'] = label
+    return alrm + ' ' + trade + ' ' + label
+
 
 def writedata(market):
     market['ts'] = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
@@ -74,16 +105,16 @@ def writedata(market):
 
 def min(li):
     m = 999999999
-    for arg in li:
-        if m > arg:
-            m = arg
+    for cen in li:
+        if m > li[cen]:
+            m = li[cen]
     return m
 
 def max(li):
     m = 0
-    for arg in li:
-        if m < arg:
-            m = arg
+    for cen in li:
+        if m < li[cen]:
+            m = li[cen]
     return m
 
 
