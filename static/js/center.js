@@ -1,4 +1,8 @@
 window.onload = function(){
+    // for fast loading
+    get_balance();
+    get_bid();
+
     var balance_interval = setInterval(get_balance, 10000);
     var table_interval = setInterval(get_bid, 10000);
 };

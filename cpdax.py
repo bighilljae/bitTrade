@@ -9,18 +9,21 @@ import threading
 class Cpdax():
     price = {}
     balance = {}
-
-    def __init__(self):
+    api_key = ''
+    secret_key = ''
+    def __init__(self, key, secret):
+        self.api_key = key
+        self.secret_key = secret
         self.run_worker()
 
     @property
     def headers(self):
         t = str(int(time.time()))
-        msg = API_KEY + t + 'GET' + '/v1/balance'
-        h = hmac.new(SECRET_KEY.encode('utf-8'), msg.encode('utf-8'), hashlib.sha256).hexdigest()
+        msg = self.api_key + t + 'GET' + '/v1/balance'
+        h = hmac.new(self.secret_key.encode('utf-8'), msg.encode('utf-8'), hashlib.sha256).hexdigest()
         h64 = h
         return {
-            'CP-ACCESS-KEY': API_KEY,
+            'CP-ACCESS-KEY': self.api_key,
             'CP-ACCESS-TIMESTAMP': t,
             'CP-ACCESS-DIGEST': str(h64)}
 

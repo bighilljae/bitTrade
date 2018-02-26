@@ -4,12 +4,13 @@ from bithumb import Bithumb
 from korbit import Korbit
 from cpdax import Cpdax
 import requests
+from auth import *
 
 app = Flask(__name__)
-api_bithumb = Bithumb()
-api_korbit = Korbit()
-api_cpdax = Cpdax()
-api_coinone = Coinone()
+api_bithumb = Bithumb(BITHUMB_KEY, BITHUMB_SECRET)
+api_korbit = Korbit(KORBIT_KEY, KORBIT_SECRET, KORBIT_USERNAME, KORBIT_PWD)
+api_cpdax = Cpdax(CPDAX_KEY, CPDAX_SECRET)
+api_coinone = Coinone(COINONE_KEY, COINONE_SECRET)
 
 @app.route('/hello/')
 def api_root():

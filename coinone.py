@@ -13,11 +13,13 @@ import threading
 URL = 'https://api.coinone.co.kr'
 
 class Coinone:
+    api_key = ''
+    secret_key = ''
     price = {}
     balance = {}
-    def __init__(self):
-        self.api_key = API_KEY
-        self.secret_key = SECRET_KEY
+    def __init__(self, key, secret):
+        self.api_key = key
+        self.secret_key = secret
         self.run_worker()
 
     def get_signature(self, encoded_payload, key):

@@ -4,9 +4,17 @@ import threading
 import time
 
 class Korbit():
+    api_key = ''
+    secret_key = ''
+    username = ''
+    password = ''
     price = {}
     balance = {}
-    def __init__(self):
+    def __init__(self, key, secret, name, pwd):
+        self.api_key = key
+        self.secret_key = secret
+        self.username = name
+        self.password = pwd
         self.token = {}
         self.expire_date = None
         self.create_token()
@@ -23,10 +31,10 @@ class Korbit():
 
     def create_token(self):
         payload = {
-            'client_id': API_KEY,
-            'client_secret': SECRET_KEY,
-            'username': USERNAME,
-            'password': PWD,
+            'client_id': self.api_key,
+            'client_secret': self.secret_key,
+            'username': self.username,
+            'password': self.password,
             'grant_type': 'password'
         }
         res = requests.post("https://api.korbit.co.kr/v1/oauth2/access_token", data=payload)
@@ -35,8 +43,8 @@ class Korbit():
 
     def refresh_token(self):
         payload = {
-            'client_id': API_KEY,
-            'client_secret': SECRET_KEY,
+            'client_id': self.api_key,
+            'client_secret': self.secret_key,
             'refresh_token': self.token['refresh_token'],
             'grant_type': 'refresh_token'
         }

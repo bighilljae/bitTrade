@@ -22,7 +22,9 @@ class Bithumb:
     price = {}
     balance = {}
 
-    def __init__(self):
+    def __init__(self, key, secret):
+        self.api_key = key
+        self.api_secret = secret
         self.run_worker()
 
     def get_header(self, endpoint, str_data):
