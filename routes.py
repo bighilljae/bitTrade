@@ -56,7 +56,17 @@ def bid():
         if len(u[cur].keys()) < 2:
             del u[cur]
 
+    writedata(market)
     return json.dumps(u)
+
+def writedata(market):
+    market['ts'] = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+    try:
+        f = open(os.path.dirname(os.path.abspath(__file__)) + "/data/" + datetime.datetime.now().strftime('%Y-%m-%d')+'.txt', 'a')
+    except:
+        f = open(os.path.dirname(os.path.abspath(__file__)) + "/data/" + datetime.datetime.now().strftime('%Y-%m-%d')+'.txt', 'w')
+    f.write(json.dumps(market) + '\n')
+    f.close()
 
 def min(li):
     m = 999999999
