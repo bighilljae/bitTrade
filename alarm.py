@@ -17,7 +17,7 @@ class Alarm:
             self.msg = self.msg + '\n' + cur + ' ' + str(round((per - 1) * 100, 2)) + '% 차이 발생'
 
     def message(self):
-        if self.lastMessage is None or datetime.datetime.now() > self.lastMessage + datetime.timedelta(minutes=self.minutes):
+        if self.lastMessage is None or datetime.datetime.now() > self.lastMessage + datetime.timedelta(minutes=self.minutes) and self.msg != '':
             self.lastMessage = datetime.datetime.now()
             self.bot.sendMessage(chat_id=self.id, text=self.msg)
             self.msg = ''
