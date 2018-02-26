@@ -68,7 +68,10 @@ class Bithumb:
 
 def get_bithumb_balance(api):
     while True:
-        r = api.secret_api("/info/balance", currency='ALL').json()
+        r = api.secret_api("/info/balance", currency='ALL')
+        if r.status_code != requests.codes.ok:
+            continue
+        r = r.json()
         for k in r['data']:
             if str.startswith(k, 'total'):
                 api.balance[k[6:]] = r['data'][k]

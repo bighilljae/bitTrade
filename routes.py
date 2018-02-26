@@ -4,6 +4,8 @@ from bithumb import Bithumb
 from korbit import Korbit
 from cpdax import Cpdax
 import requests
+import datetime
+import os
 from auth import *
 
 app = Flask(__name__)
@@ -62,9 +64,11 @@ def bid():
 def writedata(market):
     market['ts'] = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
     try:
-        f = open(os.path.dirname(os.path.abspath(__file__)) + "/data/" + datetime.datetime.now().strftime('%Y-%m-%d')+'.txt', 'a')
+        f = open(os.path.dirname(os.path.abspath(__file__)) + os.sep + "data" + os.sep + datetime.datetime.now().strftime('%Y-%m-%d')+'.txt', 'a')
     except:
-        f = open(os.path.dirname(os.path.abspath(__file__)) + "/data/" + datetime.datetime.now().strftime('%Y-%m-%d')+'.txt', 'w')
+        if not os.path.exists(os.path.dirname(os.path.abspath(__file__)) + os.sep + "data" + os.sep):
+            os.makedirs(os.path.dirname(os.path.abspath(__file__)) + os.sep + "data" + os.sep)
+        f = open(os.path.dirname(os.path.abspath(__file__)) + os.sep + "data" + os.sep + datetime.datetime.now().strftime('%Y-%m-%d')+'.txt', 'w')
     f.write(json.dumps(market) + '\n')
     f.close()
 
@@ -126,7 +130,12 @@ def get2(api):
     price = api.price
     balance = api.balance
 
-    sum = float(balance['krw'])
+    sum = 0
+    try:
+        sum = float(balance['krw'])
+    except:
+        pass
+
     for key in price:
         try:
             sum += float(price[key]) * float(balance[key])

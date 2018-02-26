@@ -7,6 +7,7 @@ import httplib2
 import time
 import math
 import threading
+import sys, traceback
 
 
 
@@ -64,13 +65,16 @@ def get_coinone_price(api):
     while True:
         currency = ['btc', 'bch', 'eth', 'etc', 'xrp', 'qtum', 'ltc', 'btg']
         res = {}
-        for cur in currency:
-            r = requests.get("https://api.coinone.co.kr/orderbook/?currency=%s" % cur)
-            if r.status_code != requests.codes.ok:
-                continue
-            res[cur] = float(r.json()['bid'][0]['price'])
-        api.price = res
-        time.sleep(10)
+        try:
+            for cur in currency:
+                r = requests.get("https://api.coinone.co.kr/orderbook/?currency=%s" % cur)
+                if r.status_code != requests.codes.ok:
+                    continue
+                res[cur] = float(r.json()['bid'][0]['price'])
+            api.price = res
+        except:
+            traceback.print_exc(file=sys.stdout)
+        time.sleep(20)
 
 def get_coinone_balance(api):
     while True:
