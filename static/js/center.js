@@ -1,5 +1,6 @@
 window.onload = function(){
     // for fast loading
+    saveSetting(true);
     get_balance();
     get_bid();
 
@@ -36,10 +37,11 @@ function get_bid(){
     });
 }
 
-function saveSetting(){
+function saveSetting(arg){
     $.get('/save', {alarm: $('.alarm input').is(':checked'),
         trade: $('.trade input').is(':checked'),
         label: $('.label input').val()}, function(){
-        alert('저장이 완료되었습니다');
+        if( !arg )
+            alert('저장이 완료되었습니다');
     });
 }

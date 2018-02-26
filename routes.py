@@ -66,7 +66,7 @@ def bid():
         if len(u[cur].keys()) < 2:
             del u[cur]
             continue
-        if max(u[cur]) / min(u[cur]) > 1.006 and app_settings['alarm'] is True:
+        if max(u[cur]) / min(u[cur]) > 1.006 and app_settings['alarm'] is True and not cur in app_settings['label'].split(','):
             bot.add(cur, max(u[cur]) / min(u[cur]))
     bot.message()
 
