@@ -2,6 +2,8 @@ import requests
 import datetime
 import threading
 import time
+import os
+import sys
 
 class Korbit():
     api_key = ''
@@ -37,9 +39,24 @@ class Korbit():
             'password': self.password,
             'grant_type': 'password'
         }
-        res = requests.post("https://api.korbit.co.kr/v1/oauth2/access_token", data=payload)
-        self.token = res.json()
-        self.expire_date = datetime.datetime.now() + datetime.timedelta(hours=1)
+        try:
+            f = open(os.path.dirname(os.path.abspath(__file__)) + os.sep + "data" + os.sep + 'korbit_token.txt', 'r')
+            list = f.readlines()
+            #res = f.readline().json.loads()
+            res = list[0].json.loads()
+            expire_date_from_korbit_token = list[1]
+            f.close()
+        except:
+            if not os.path.exists(os.path.dirname(os.path.abspath(__file__)) + os.sep + "data" + os.sep):
+                os.makedirs(os.path.dirname(os.path.abspath(__file__)) + os.sep + "data" + os.sep)
+            f = open(os.path.dirname(os.path.abspath(__file__)) + os.sep + "data" + os.sep +  'korbit_token.txt', 'w')
+            res = requests.post("https://api.korbit.co.kr/v1/oauth2/access_token", data=payload).json()
+            f.write(str(res)+'\n')
+            f.write(str(datetime.datetime.now() + datetime.timedelta(hours=1)))
+            expire_date_from_korbit_token = datetime.datetime.now() + datetime.timedelta(hours=1)
+            f.close()
+        self.token = res
+        self.expire_date = expire_date_from_korbit_token
 
     def refresh_token(self):
         payload = {
