@@ -40,7 +40,8 @@ function get_bid(){
 function saveSetting(arg){
     $.get('/save', {alarm: $('.alarm input').is(':checked'),
         trade: $('.trade input').is(':checked'),
-        label: $('.label input').val()}, function(){
+        label: $('.label input').val(),
+        threshod: $('.trade_thres input').val()}, function(){
         if( !arg )
             alert('저장이 완료되었습니다');
     });

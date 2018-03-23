@@ -80,6 +80,23 @@ class Korbit():
         b_thread.daemon = True
         b_thread.start()
 
+
+
+    def buy_coin(self, cur, amount):
+        r = requests.post("https://api.korbit.co.kr/v1/user/orders/buy", headers=self.headers,
+                          data={'type': 'limit', 'side': 'buy', 'product_id': str(cur).upper()+"-KRW",
+                                'size': 100000/self.price, 'price': self.price}).json()
+        return {
+            'units': r['filled_size'],
+            'price': r['price']
+        }
+
+        # Pre check doned
+
+    def sell_coin(self, cur, amount):
+        r = requests.post("https://api.cpdax.com/v1/orders", headers=self.headers,
+                          data={'type': 'market', 'side': 'sell', 'product_id': str(cur).upper() + "-KRW", 'size': amount}).json()
+
 def get_korbit_balance(api):
     while True:
         r = requests.get('https://api.korbit.co.kr/v1/user/balances', headers=api.headers).json()
