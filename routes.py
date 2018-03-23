@@ -107,7 +107,10 @@ def saveSetting():
         app_settings['trade'] = False
     label = request.args.get('label', default='', type=str)
     app_settings['label'] = label
-    return alrm + ' ' + trade + ' ' + label
+
+    ll = request.args.get('threshold', default='', type=str)
+    app_settings['threshold'] = float(ll)
+    return alrm + ' ' + trade + ' ' + label + ' ' + ll
 
 
 def writedata(market):
