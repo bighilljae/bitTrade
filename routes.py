@@ -156,7 +156,6 @@ def coinone_get(r):
     return ar
 
 
-# TODO get2 함수들은 각 객체 안으로 이동
 def get2(api):
     price = api.price
     balance = api.balance
@@ -174,11 +173,6 @@ def get2(api):
             pass
     return sum
 
-'''
-현재 coinone을 제외한 거래소의 경우에는 해당 거래소가 취급하는 코인의 종류에 변동이 생기면 수동으로 코드를 변경해 맞춰 줘야 함.
-자동화를 위해서는 해당 api dictionary에서 코인 이름을 빼내 맞춰야 할 것으로 보임.
-'''
-
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000)
