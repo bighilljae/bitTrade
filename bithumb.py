@@ -66,6 +66,18 @@ class Bithumb:
         b_thread.daemon = True
         b_thread.start()
 
+    # Pre check doned
+    def buy_coin(self, cur, amount):
+        r = self.secret_api("/trade/place", {'order_currency': str(cur).upper(), 'units': 100000/self.price, 'price': self.price, 'type': 'bid'}).json()
+        return {
+            'units': r['units'],
+            'price': r['price']
+        }
+
+    # Pre check doned
+    def sell_coin(self, cur, amount):
+        r = self.secret_api("/trade/market_sell",  {'currency': str(cur).upper(), 'units': amount}).json()
+
 def get_bithumb_balance(api):
     while True:
         r = api.secret_api("/info/balance", currency='ALL')
@@ -90,3 +102,4 @@ def get_bithumb_price(api):
                 pass
         api.price = result
         time.sleep(5)
+

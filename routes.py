@@ -4,9 +4,11 @@ from bithumb import Bithumb
 from korbit import Korbit
 from cpdax import Cpdax
 from alarm import Alarm
+import threading
 import requests
 import datetime
 import os
+import time
 from auth import *
 
 app = Flask(__name__)
@@ -19,7 +21,8 @@ api_coinone = Coinone(COINONE_KEY, COINONE_SECRET)
 app_settings = {
     'alarm': True,
     'trade': False,
-    'label': ''
+    'label': 'btg,eos',
+    'threshold': 1.5
 }
 
 @app.route('/hello/')
@@ -66,14 +69,29 @@ def bid():
         if len(u[cur].keys()) < 2:
             del u[cur]
             continue
-        if max(u[cur]) / min(u[cur]) > 1.006 and app_settings['alarm'] is True and not cur in app_settings['label'].split(','):
+        m1, c1 = max(u[cur])
+        m2, c2 = min(u[cur])
+        if m1 / m2 > 1.006 and app_settings['alarm'] is True and not cur in app_settings['label'].split(','):
             bot.add(cur, max(u[cur]) / min(u[cur]))
+        if m1 / m2 > (1+app_settings['threshold']/100) and app_settings['trade'] is True:
+            r = c2api(c1).buy_coin(cur, 0)
+            c2api(c2).sell_coin(cur, r['units'])
+
     bot.message()
 
 
     writedata(market)
     return json.dumps(u)
 
+def c2api(c):
+    if c == 'coinone':
+        return api_coinone
+    if c == 'korbit':
+        return api_korbit
+    if c == 'cpdax':
+        return api_cpdax
+    if c == 'bithumb':
+        return api_bithumb
 
 @app.route('/save')
 def saveSetting():
@@ -112,10 +130,12 @@ def min(li):
 
 def max(li):
     m = 0
+    c = ''
     for cen in li:
         if m < li[cen]:
             m = li[cen]
-    return m
+            c = cen
+    return m, c
 
 
 def korbit_get(r):
@@ -180,5 +200,18 @@ def get2(api):
 '''
 
 
+def run_bid():
+    while True:
+        time.sleep(5)
+        if app_settings['alarm'] is True:
+            try:
+                bid()
+            except:
+                pass
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    b_thread = threading.Thread(target=run_bid)
+    b_thread.daemon = True
+    b_thread.start()
+    app.run(host='0.0.0.0', port=5000)
+

@@ -51,6 +51,20 @@ class Coinone:
     def bid(self):
         return self.price
 
+    # Pre check doned
+    def buy_coin(self, cur, amount):
+        r = self.secret_api("/v2/order/limit_buy/", {'price': self.price, 'qty': 100000/self.price, 'currency': cur})
+        return {
+            'units': 100000/self.price,
+            'price': self.price
+        }
+
+    # Pre check doned
+    def sell_coin(self, cur, amount):
+        # r = self.secret_api("/trade/market_sell", {'currency': str(cur).upper(), 'units': amount}).json()
+        self.secret_api("/v2/order/limit_sell/", {'price': self.price, 'qty': amount, 'currency': cur})
+
+
     def run_worker(self):
         p_thread = threading.Thread(target=get_coinone_price, args=(self,))
         p_thread.daemon = True
