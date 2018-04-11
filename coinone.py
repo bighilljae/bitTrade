@@ -44,6 +44,7 @@ class Coinone:
         }
         payload = dict(endpoint_item_array, **kwargs)
         res = requests.post(url_path, headers=self.get_header(payload), data=payload)
+        print('coinone secret_api ' + endpoint + ' ' + str(res.status_code) + ' ' + res.text)
         if res.status_code != requests.codes.ok:
             print('[ERR] coinone: ' + endpoint + " : " + res.text)
         return res
@@ -53,16 +54,16 @@ class Coinone:
 
     # Pre check doned
     def buy_coin(self, cur, amount):
-        r = self.secret_api("/v2/order/limit_buy/", {'price': self.price, 'qty': 100000/self.price, 'currency': cur})
+        r = self.secret_api("/v2/order/limit_buy/", price=self.price[cur], qty=100000/self.price[cur], currency=cur)
         return {
-            'units': 100000/self.price,
-            'price': self.price
+            'units': 100000/self.price[cur],
+            'price': self.price[cur]
         }
 
     # Pre check doned
     def sell_coin(self, cur, amount):
         # r = self.secret_api("/trade/market_sell", {'currency': str(cur).upper(), 'units': amount}).json()
-        self.secret_api("/v2/order/limit_sell/", {'price': self.price, 'qty': amount, 'currency': cur})
+        self.secret_api("/v2/order/limit_sell/", price=self.price[cur], qty=amount, currency=cur)
 
 
     def run_worker(self):

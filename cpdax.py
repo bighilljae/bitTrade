@@ -43,7 +43,7 @@ class Cpdax():
 
     def buy_coin(self, cur, amount):
         r = requests.post("https://api.cpdax.com/v1/orders", headers=self.headers, data={'type': 'limit', 'side': 'buy', 'product_id': str(cur).upper()+"-KRW",
-                                           'size': 100000/self.price, 'price': self.price}).json()
+                                           'size': 100000/self.price[cur], 'price': self.price[cur]}).json()
         return {
             'units': r['filled_size'],
             'price': r['price']
