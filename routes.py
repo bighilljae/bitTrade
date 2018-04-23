@@ -22,7 +22,8 @@ app_settings = {
     'alarm': True,
     'trade': False,
     'label': 'btg,eos',
-    'threshold': 1.5
+    'threshold': 1.5,
+    'alarm_thres': 0.6
 }
 
 @app.route('/hello/')
@@ -71,7 +72,7 @@ def bid():
             continue
         m1, c1 = max(u[cur])
         m2, c2 = min(u[cur])
-        if m1 / m2 > 1.006 and app_settings['alarm'] is True and not cur in app_settings['label'].split(','):
+        if m1 / m2 > 1+app_settings['alarm_thres']/100 and app_settings['alarm'] is True and not cur in app_settings['label'].split(','):
             bot.add(cur, m1 / m2)
         if m1 / m2 > (1+app_settings['threshold']/100) and app_settings['trade'] is True:
             r = c2api(c1).buy_coin(cur, 100000)
@@ -111,9 +112,13 @@ def saveSetting():
     app_settings['label'] = label
 
     ll = request.args.get('threshold', default='', type=str)
-    print('ll : ' + ll)
     app_settings['threshold'] = float(ll)
-    return alrm + ' ' + trade + ' ' + label + ' ' + ll
+
+    at = request.args.get('alarm_thres', default='', type=str)
+    app_settings['alarm_thres'] = float(at)
+
+    print(json.dumps(app_settings))
+    return json.dumps(app_settings)
 
 
 def writedata(market):

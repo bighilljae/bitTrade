@@ -44,7 +44,8 @@ class Coinone:
         }
         payload = dict(endpoint_item_array, **kwargs)
         res = requests.post(url_path, headers=self.get_header(payload), data=payload)
-        print('coinone secret_api ' + endpoint + ' ' + str(res.status_code) + ' ' + res.text)
+        if endpoint != '/v2/account/balance':
+            print('coinone secret_api ' + endpoint + ' ' + str(res.status_code) + ' ' + res.text)
         if res.status_code != requests.codes.ok:
             print('[ERR] coinone: ' + endpoint + " : " + res.text)
         return res
@@ -54,7 +55,7 @@ class Coinone:
 
     # Pre check doned
     def buy_coin(self, cur, amount=100000):
-        qty = str(round(amount/self.price[cur]))
+        qty = str(round(amount/self.price[cur], 4))
         r = self.secret_api("/v2/order/limit_buy/", price=str(self.price[cur]), qty=qty, currency=cur)
         return {
             'units': amount/self.price[cur],

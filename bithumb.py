@@ -51,9 +51,9 @@ class Bithumb:
 
         session = requests.Session()
         session.cookies.clear()
-        print(str_data)
         resp = session.request('POST', self.api_url+endpoint, data=str_data, headers=self.get_header(endpoint, str_data))
-        print('bithumb secert_api ' + endpoint + ' ' + str(resp.status_code) + ' ' + resp.text)
+        if endpoint != '/info/balance':
+            print('bithumb secert_api ' + endpoint + ' ' + str(resp.status_code) + ' ' + resp.text)
         return resp
 
     def bid(self):

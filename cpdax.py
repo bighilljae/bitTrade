@@ -43,6 +43,7 @@ class Cpdax():
 
     def buy_coin(self, cur, amount=100000):
         size = str(round(amount / self.price[cur], 4))
+        print('cpdax buy_coin %f' % round(amount / self.price[cur], 4))
         r = requests.post("https://api.cpdax.com/v1/orders",
                           headers=self.headers,
                           data={'type': 'limit', 'side': 'buy',

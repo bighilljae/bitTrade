@@ -41,7 +41,8 @@ function saveSetting(arg){
     $.get('/save', {alarm: $('.alarm input').is(':checked'),
         trade: $('.trade input').is(':checked'),
         label: $('.label input').val(),
-        threshold: $('.trade_thres input').val()}, function(){
+        threshold: $('.trade_thres input').val(),
+        alarm_thres: $('.alarm_thres input').val()}, function(){
         if( !arg )
             alert('저장이 완료되었습니다');
     });

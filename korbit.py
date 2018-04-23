@@ -83,7 +83,8 @@ class Korbit():
 
 
     def buy_coin(self, cur, amount):
-        size = str(round(amount / self.price[cur]), 4)
+        size = str(round(amount / self.price[cur], 4))
+        print('korbit buy_coin %f', round(amount / self.price[cur], 4))
         r = requests.post("https://api.korbit.co.kr/v1/user/orders/buy", headers=self.headers,
                           data={'type': 'limit', 'side': 'buy', 'product_id': str(cur).upper()+"-KRW",
                                 'size': size, 'price': str(self.price[cur])}).json()
