@@ -41,9 +41,13 @@ class Cpdax():
 
         # Pre check doned
 
-    def buy_coin(self, cur, amount):
-        r = requests.post("https://api.cpdax.com/v1/orders", headers=self.headers, data={'type': 'limit', 'side': 'buy', 'product_id': str(cur).upper()+"-KRW",
-                                           'size': 100000/self.price[cur], 'price': self.price[cur]}).json()
+    def buy_coin(self, cur, amount=100000):
+        size = str(round(amount / self.price[cur], 4))
+        r = requests.post("https://api.cpdax.com/v1/orders",
+                          headers=self.headers,
+                          data={'type': 'limit', 'side': 'buy',
+                                'product_id': str(cur).upper()+"-KRW",
+                                'size': size, 'price': str(self.price[cur])}).json()
         return {
             'units': r['filled_size'],
             'price': r['price']
@@ -53,7 +57,7 @@ class Cpdax():
 
     def sell_coin(self, cur, amount):
         r = requests.post("https://api.cpdax.com/v1/orders", headers=self.headers,
-                          data={'type': 'market', 'side': 'sell', 'product_id': str(cur).upper() + "-KRW",'size': amount}).json()
+                          data={'type': 'market', 'side': 'sell', 'product_id': str(cur).upper() + "-KRW", 'size': str(amount)}).json()
 
 def get_cpdax_price(api):
     while True:

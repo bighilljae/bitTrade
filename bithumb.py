@@ -46,10 +46,12 @@ class Bithumb:
             "endpoint": endpoint
         }
         uri_array = dict(endpoint_item_array, **kwargs)  # Concatenate the two arrays.
+        json_data = json.dumps(uri_array)
         str_data = urllib.parse.urlencode(uri_array)
 
         session = requests.Session()
         session.cookies.clear()
+        print(str_data)
         resp = session.request('POST', self.api_url+endpoint, data=str_data, headers=self.get_header(endpoint, str_data))
         print('bithumb secert_api ' + endpoint + ' ' + str(resp.status_code) + ' ' + resp.text)
         return resp
@@ -67,8 +69,9 @@ class Bithumb:
         b_thread.start()
 
     # Pre check doned
-    def buy_coin(self, cur, amount):
-        r = self.secret_api("/trade/place", order_currency=str(cur).upper(), units=100000/self.price[cur],price=self.price[cur], type='bid').json()
+    def buy_coin(self, cur, amount=100000):
+        units = str(round(amount / self.price[cur], 4))
+        r = self.secret_api("/trade/place", order_currency=str(cur).upper(), units=units, price=str(self.price[cur]), type='bid').json()
         return {
             'units': r['units'],
             'price': r['price']
@@ -76,7 +79,7 @@ class Bithumb:
 
     # Pre check doned
     def sell_coin(self, cur, amount):
-        r = self.secret_api("/trade/market_sell",  currency=str(cur).upper(), units=amount).json()
+        r = self.secret_api("/trade/market_sell",  currency=str(cur).upper(), units=str(amount)).json()
 
 def get_bithumb_balance(api):
     while True:
