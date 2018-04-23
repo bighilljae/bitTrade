@@ -52,7 +52,6 @@ def exchange():
     exchange_krw = {}
     exchange_krw['coinone'] = api_coinone.balance
     exchange_krw['coinone']['get2'] = str(get2(api_coinone))
-    print('coinone!!! ' + str(exchange_krw['coinone']['get2']))
     exchange_krw['korbit'] = api_korbit.balance
     exchange_krw['korbit']['get2'] = get2(api_korbit)
     exchange_krw['cpdax'] = api_coinone.balance
@@ -99,6 +98,7 @@ def bid():
             if len(trade_history) > 10:
                 trade_history = trade_history[:10]
             print('Trade Done ' + c2api(c2).__class__.__name__ + ' ' + c2api(c1).__class__.__name__)
+            app_settings['trade'] = False
 
     bot.message()
 
