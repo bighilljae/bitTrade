@@ -92,16 +92,21 @@ class Korbit():
             if float(size) == 0 :
                 raise Exception('Size error')
             r = requests.post("https://api.korbit.co.kr/v1/user/orders/buy", headers=self.headers,
-                              data={'type': 'limit', 'side': 'buy', 'product_id': str(cur).upper()+"-KRW",
-                                    'size': size, 'price': str(int(self.price[cur]))}).json()
+                              data={'type': 'limit',
+                                    #  'currency_pair': str(cur)+"_krw",
+                                    'coin_amount': size, 'price': str(int(self.price[cur]))})
+            print(r.status_code)
+            print(r.text)
+            r = r.json()
             return {
-                'units': r['filled_size'],
-                'price': r['price']
+                'units': size,
+                'price': str(int(self.price[cur]))
             }
         except:
             return {
                 'units': 0,
-                'price': 0
+                'price': 0,
+                'error': True
             }
 
         # Pre check doned
