@@ -17,13 +17,15 @@ api_bithumb = Bithumb(BITHUMB_KEY, BITHUMB_SECRET)
 api_korbit = Korbit(KORBIT_KEY, KORBIT_SECRET, KORBIT_USERNAME, KORBIT_PWD)
 api_cpdax = Cpdax(CPDAX_KEY, CPDAX_SECRET)
 api_coinone = Coinone(COINONE_KEY, COINONE_SECRET)
+trade_history = []
 
 app_settings = {
     'alarm': True,
     'trade': False,
     'label': 'btg,eos',
     'threshold': 1.5,
-    'alarm_thres': 0.6
+    'alarm_thres': 0.6,
+    'order': 100000
 }
 
 @app.route('/hello/')
@@ -40,19 +42,29 @@ def api_root():
 def home():
     return render_template('index.html')
 
+@app.route('/history')
+def history():
+    return json.dumps(trade_history)
 
 @app.route('/exchangekrw/')
 def exchange():
     # change to api_price
     exchange_krw = {}
-    exchange_krw['coinone'] = get2(api_coinone)
-    exchange_krw['korbit'] = get2(api_korbit)
-    exchange_krw['cpdax'] = get2(api_cpdax)
-    exchange_krw['bithumb'] = get2(api_bithumb)
+    exchange_krw['coinone'] = api_coinone.balance
+    exchange_krw['coinone']['get2'] = str(get2(api_coinone))
+    print('coinone!!! ' + str(exchange_krw['coinone']['get2']))
+    exchange_krw['korbit'] = api_korbit.balance
+    exchange_krw['korbit']['get2'] = get2(api_korbit)
+    exchange_krw['cpdax'] = api_coinone.balance
+    exchange_krw['cpdax']['get2'] = get2(api_cpdax)
+    exchange_krw['bithumb'] = api_bithumb.balance
+    exchange_krw['bithumb']['get2'] = get2(api_bithumb)
+    print(json.dumps(exchange_krw))
     return json.dumps(exchange_krw)
 
 @app.route('/bid/')
 def bid():
+    global trade_history
     market = {}
     market['coinone'] = api_coinone.bid()
     market['korbit'] = api_korbit.bid()
@@ -70,15 +82,23 @@ def bid():
         if len(u[cur].keys()) < 2:
             del u[cur]
             continue
+        if cur in app_settings['label'].split(','):
+            continue
         m1, c1 = max(u[cur])
         m2, c2 = min(u[cur])
         if m1 / m2 > 1+app_settings['alarm_thres']/100 and app_settings['alarm'] is True and not cur in app_settings['label'].split(','):
             bot.add(cur, m1 / m2)
         if m1 / m2 > (1+app_settings['threshold']/100) and app_settings['trade'] is True:
-            r = c2api(c1).buy_coin(cur, 100000)
-            c2api(c2).sell_coin(cur, r['units'])
-            print('Trade Done ' + c2api(c1).__class__.__name__ + ' ' + c2api(c2).__class__.__name__)
-            app_settings['trade'] = False
+            r = c2api(c2).buy_coin(cur, app_settings['order'], float(c2api(c1).balance[cur]))
+            if r['units'] > 0:
+                c2api(c1).sell_coin(cur, r['units'])
+                trade_history.insert(0, {'buy': c2api(c2).__class__.__name__,
+                                           'sell': c2api(c1).__class__.__name__,
+                                            'cur': cur,
+                                           'amount': r['units']})
+            if len(trade_history) > 10:
+                trade_history = trade_history[:10]
+            print('Trade Done ' + c2api(c2).__class__.__name__ + ' ' + c2api(c1).__class__.__name__)
 
     bot.message()
 
@@ -117,6 +137,8 @@ def saveSetting():
     at = request.args.get('alarm_thres', default='', type=str)
     app_settings['alarm_thres'] = float(at)
 
+    ord = request.args.get('order', default='', type=str)
+    app_settings['order'] = int(ord)
     print(json.dumps(app_settings))
     return json.dumps(app_settings)
 

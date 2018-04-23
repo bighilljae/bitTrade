@@ -41,22 +41,34 @@ class Cpdax():
 
         # Pre check doned
 
-    def buy_coin(self, cur, amount=100000):
-        size = str(round(amount / self.price[cur], 4))
+    def buy_coin(self, cur, amount, account):
+        if round(amount / self.price[cur], 4) < account:
+            size = str(round(amount / self.price[cur], 4))
+        else:
+            size = str(round(account, 4))
         print('cpdax buy_coin %f' % round(amount / self.price[cur], 4))
-        r = requests.post("https://api.cpdax.com/v1/orders",
-                          headers=self.headers,
-                          data={'type': 'limit', 'side': 'buy',
-                                'product_id': str(cur).upper()+"-KRW",
-                                'size': size, 'price': str(self.price[cur])}).json()
-        return {
-            'units': r['filled_size'],
-            'price': r['price']
-        }
+        try:
+            if float(size) == 0:
+                raise Exception('Size Error')
+            r = requests.post("https://api.cpdax.com/v1/orders",
+                              headers=self.headers,
+                              data={'type': 'limit', 'side': 'buy',
+                                    'product_id': str(cur).upper()+"-KRW",
+                                    'size': size, 'price': str(int(self.price[cur]))}).json()
+            return {
+                'units': r['filled_size'],
+                'price': r['price']
+            }
+        except:
+            return {
+                'units': 0,
+                'price': 0
+            }
 
         # Pre check doned
 
     def sell_coin(self, cur, amount):
+        print('cpdax sell_coin %f' % amount)
         r = requests.post("https://api.cpdax.com/v1/orders", headers=self.headers,
                           data={'type': 'market', 'side': 'sell', 'product_id': str(cur).upper() + "-KRW", 'size': str(amount)}).json()
 

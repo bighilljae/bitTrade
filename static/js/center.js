@@ -6,13 +6,37 @@ window.onload = function(){
 
     var balance_interval = setInterval(get_balance, 10000);
     var table_interval = setInterval(get_bid, 10000);
+    var history_interval = setInterval(get_history, 5000);
 };
 
+function get_history() {
+    $.get('/history', function(res){
+        res = JSON.parse(res);
+        $('table.history tbody').empty();
+        for(h in res){
+            his = res[h];
+            $tr = $('table.history tbody').append('<tr>');
+            $tr.append(`<td>${his.buy}</td><td>${his.sell}</td><td>${his.cur}</td><td>${his.amount}</td>`)
+        }
+    });
+}
+
 function get_balance(){
+    currencies = ['krw', 'btc', 'bch', 'etc', 'eth', 'ltc'];
     $.get('/exchangekrw/', function(res){
         res = JSON.parse(res);
         for( cen in res ){
-            $('.'+cen + ' .balance_number').text(parseInt(res[cen]));
+            $('.'+cen + ' .balance_number').text(parseInt(res[cen].get2));
+        }
+
+        for( cur in currencies ){
+            val = 0;
+            for( cen in res ){
+                if( res[cen][currencies[cur]] ) {
+                    val = val + parseFloat(res[cen][currencies[cur]]);
+                }
+            }
+            $('.accs td.'+currencies[cur]).text(val);
         }
     });
 }
@@ -33,6 +57,8 @@ function get_bid(){
                 $(`td.${cen}`, $tr).last().text(res[cur][cen]);
             }
             $('td', $tr).last().text(((max-min)/min*100).toFixed(2));
+            $(`td:contains(${max})`, $tr).css('background-color', 'aliceblue');
+            $(`td:contains(${min})`, $tr).css('background-color', 'lavenderblush');
         }
     });
 }
@@ -42,7 +68,8 @@ function saveSetting(arg){
         trade: $('.trade input').is(':checked'),
         label: $('.label input').val(),
         threshold: $('.trade_thres input').val(),
-        alarm_thres: $('.alarm_thres input').val()}, function(){
+        alarm_thres: $('.alarm_thres input').val(),
+        order: $('.order input').val()}, function(){
         if( !arg )
             alert('저장이 완료되었습니다');
     });

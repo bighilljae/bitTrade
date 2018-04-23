@@ -82,20 +82,32 @@ class Korbit():
 
 
 
-    def buy_coin(self, cur, amount):
-        size = str(round(amount / self.price[cur], 4))
-        print('korbit buy_coin %f', round(amount / self.price[cur], 4))
-        r = requests.post("https://api.korbit.co.kr/v1/user/orders/buy", headers=self.headers,
-                          data={'type': 'limit', 'side': 'buy', 'product_id': str(cur).upper()+"-KRW",
-                                'size': size, 'price': str(self.price[cur])}).json()
-        return {
-            'units': r['filled_size'],
-            'price': r['price']
-        }
+    def buy_coin(self, cur, amount, account):
+        if round(amount / self.price[cur], 4) < account:
+            size = str(round(amount / self.price[cur], 4))
+        else:
+            size = str(round(account, 4))
+        print('korbit buy_coin %f' % round(amount / self.price[cur], 4))
+        try:
+            if float(size) == 0 :
+                raise Exception('Size error')
+            r = requests.post("https://api.korbit.co.kr/v1/user/orders/buy", headers=self.headers,
+                              data={'type': 'limit', 'side': 'buy', 'product_id': str(cur).upper()+"-KRW",
+                                    'size': size, 'price': str(int(self.price[cur]))}).json()
+            return {
+                'units': r['filled_size'],
+                'price': r['price']
+            }
+        except:
+            return {
+                'units': 0,
+                'price': 0
+            }
 
         # Pre check doned
 
     def sell_coin(self, cur, amount):
+        print('korbit sell %f' % amount)
         r = requests.post("https://api.cpdax.com/v1/orders", headers=self.headers,
                           data={'type': 'market', 'side': 'sell', 'product_id': str(cur).upper() + "-KRW", 'size': str(amount)}).json()
 

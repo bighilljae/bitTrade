@@ -69,13 +69,24 @@ class Bithumb:
         b_thread.start()
 
     # Pre check doned
-    def buy_coin(self, cur, amount=100000):
-        units = str(round(amount / self.price[cur], 4))
-        r = self.secret_api("/trade/place", order_currency=str(cur).upper(), units=units, price=str(self.price[cur]), type='bid').json()
-        return {
-            'units': r['units'],
-            'price': r['price']
-        }
+    def buy_coin(self, cur, amount, account):
+        if round(amount / self.price[cur], 4) < account:
+            units = str(round(amount / self.price[cur], 4))
+        else:
+            units = str(round(account, 4))
+        try:
+            if float(units) == 0:
+                raise Exception('size Error')
+            r = self.secret_api("/trade/place", order_currency=str(cur).upper(), units=units, price=str(int(self.price[cur])), type='bid').json()
+            return {
+                'units': r['units'],
+                'price': r['price']
+            }
+        except:
+            return {
+                'units': 0,
+                'price': 0
+            }
 
     # Pre check doned
     def sell_coin(self, cur, amount):

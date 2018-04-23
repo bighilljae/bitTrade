@@ -54,18 +54,29 @@ class Coinone:
         return self.price
 
     # Pre check doned
-    def buy_coin(self, cur, amount=100000):
-        qty = str(round(amount/self.price[cur], 4))
-        r = self.secret_api("/v2/order/limit_buy/", price=str(self.price[cur]), qty=qty, currency=cur)
-        return {
-            'units': amount/self.price[cur],
-            'price': self.price[cur]
-        }
+    def buy_coin(self, cur, amount, account):
+        if round(amount/self.price[cur], 4) < account:
+            qty = str(round(amount/self.price[cur], 4))
+        else:
+            qty = str(round(account, 4))
+        try:
+            if float(qty) == 0:
+                raise Exception('Size Error')
+            r = self.secret_api("/v2/order/limit_buy/", price=str(int(self.price[cur])), qty=qty, currency=cur)
+            return {
+                'units': round(amount/self.price[cur], 4),
+                'price': self.price[cur]
+            }
+        except:
+            return {
+                'units': 0,
+                'price': 0
+            }
 
     # Pre check doned
     def sell_coin(self, cur, amount):
         # r = self.secret_api("/trade/market_sell", {'currency': str(cur).upper(), 'units': amount}).json()
-        self.secret_api("/v2/order/limit_sell/", price=str(self.price[cur]), qty=str(amount), currency=cur)
+        self.secret_api("/v2/order/limit_sell/", price=str(int(self.price[cur])), qty=str(amount), currency=cur)
 
 
     def run_worker(self):

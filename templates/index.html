@@ -46,21 +46,53 @@
                 <div class="alarm_thres label">
                     <label><input type="text" placeholder="alarm_threshold" value="0.6"></label>
                 </div>
+                <div class="order label">
+                    <label><input type="text" placeholder="order" value="100000"></label>
+                </div>
                 <div class="button"><button type="button" class="btn btn-primary" onclick="saveSetting()">Save</button></div>
             </div>
         </div>
-        <table class="contents">
-            <thead>
-                <td>CUR</td>
-                <td><img class="center_logo" src="static/images/korbit_logo.png"></td>
-                <td><img class="center_logo" src="static/images/coinone_logo.png"></td>
-                <td><img class="center_logo" src="static/images/bithumb_logo.png"></td>
-                <td><img class="center_logo" src="static/images/cpdax_logo.png"></td>
-                <td>per</td>
-            </thead>
-            <tbody class="recent_trade">
-            </tbody>
-        </table>
+        <div class="datas" style="display:table">
+            <table class="contents table">
+                <thead>
+                    <td>CUR</td>
+                    <td><img class="center_logo" src="static/images/korbit_logo.png"></td>
+                    <td><img class="center_logo" src="static/images/coinone_logo.png"></td>
+                    <td><img class="center_logo" src="static/images/bithumb_logo.png"></td>
+                    <td><img class="center_logo" src="static/images/cpdax_logo.png"></td>
+                    <td>per</td>
+                </thead>
+                <tbody class="recent_trade">
+                </tbody>
+            </table>
+            <table class="history table table-condensed">
+                <thead>
+                    <td>BUY</td>
+                    <td>SELL</td>
+                    <td>Cur</td>
+                    <td>amount</td>
+                </thead>
+                <tbody class="trade_history"></tbody>
+            </table>
+        </div>
+        <div class="accounts">
+            <table class="accs table">
+                <thead>
+                    <td>CUR</td>
+                    <td>amount</td>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>KRW</td><td class="krw"></td>
+                    </tr>
+                    <tr><td><img class="icon" src="/static/images/ic_btc_symbol.svg">btc</td><td class="btc"></td></tr>
+                    <tr><td><img class="icon" src="/static/images/ic_bch_symbol.svg">bch</td><td class="bch"></td></tr>
+                    <tr><td><img class="icon" src="/static/images/ic_etc_symbol.svg">etc</td><td class="etc"></td></tr>
+                    <tr><td><img class="icon" src="/static/images/ic_eth_symbol.svg">eth</td><td class="eth"></td></tr>
+                    <tr><td><img class="icon" src="/static/images/ic_ltc_symbol.svg">ltc</td><td class="ltc"></td></tr>
+                </tbody>
+            </table>
+        </div>
     </div>
     <div class="footer"></div>
 </body>
