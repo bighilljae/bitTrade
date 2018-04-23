@@ -74,7 +74,7 @@ def bid():
         if m1 / m2 > 1.006 and app_settings['alarm'] is True and not cur in app_settings['label'].split(','):
             bot.add(cur, m1 / m2)
         if m1 / m2 > (1+app_settings['threshold']/100) and app_settings['trade'] is True:
-            r = c2api(c1).buy_coin(cur, 0)
+            r = c2api(c1).buy_coin(cur, 100000)
             c2api(c2).sell_coin(cur, r['units'])
             print('Trade Done ' + c2api(c1).__class__.__name__ + ' ' + c2api(c2).__class__.__name__)
             app_settings['trade'] = False
@@ -82,7 +82,7 @@ def bid():
     bot.message()
 
 
-    writedata(market)
+    # writedata(market)
     return json.dumps(u)
 
 def c2api(c):
