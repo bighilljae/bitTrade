@@ -87,14 +87,19 @@ class Korbit():
             size = str(round(amount / self.price[cur], 4))
         else:
             size = str(round(account, 4))
-        print('korbit buy_coin %f' % round(amount / self.price[cur], 4))
+        payload = {
+            'type': 'limit',
+            'currency_pair': str(cur)+"_krw",
+            'price': str(int(self.price[cur])),
+            'coin_amount': size,
+            'fiat_amount': None,
+            'nonce': self.nonce
+        }
         try:
             if float(size) == 0 :
                 raise Exception('Size error')
             r = requests.post("https://api.korbit.co.kr/v1/user/orders/buy", headers=self.headers,
-                              data={'type': 'limit',
-                                    #  'currency_pair': str(cur)+"_krw",
-                                    'coin_amount': size, 'price': str(int(self.price[cur]))})
+                              data=payload)
             print(r.status_code)
             print(r.text)
             r = r.json()
