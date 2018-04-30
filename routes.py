@@ -20,7 +20,7 @@ api_coinone = Coinone(COINONE_KEY, COINONE_SECRET)
 trade_history = []
 
 app_settings = {
-    'alarm': True,
+    'alarm': False,
     'trade': False,
     'label': 'btg,eos',
     'threshold': 1.5,
