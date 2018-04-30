@@ -100,7 +100,8 @@ def bid():
             print('Trade Done ' + c2api(c2).__class__.__name__ + ' ' + c2api(c1).__class__.__name__)
             app_settings['trade'] = False
 
-    bot.message()
+    if app_settings['alarm'] is True:
+        bot.message()
 
 
     # writedata(market)
