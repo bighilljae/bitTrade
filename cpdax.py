@@ -17,9 +17,10 @@ class Cpdax():
         self.secret_key = secret
         self.run_worker()
 
-    def headers(self, method, endpoint):
+    def headers(self, method, endpoint,body):
         t = str(int(time.time()))
-        msg = self.api_key + t + method + endpoint
+        msg = self.api_key + t + method + endpoint + body
+        print(msg)
         h = hmac.new(self.secret_key.encode('utf-8'), msg.encode('utf-8'), hashlib.sha256).hexdigest()
         h64 = h
         return {
@@ -52,14 +53,13 @@ class Cpdax():
         try:
             if float(size) == 0:
                 raise Exception('Size Error')
+            body = {'type': 'limit', 'side': 'buy',
+                                    'product_id': str(cur).upper()+"-KRW",
+                                    'size': size, 'price': str(int(self.price[cur])),'funds':'0000'}
             r = requests.post("https://api.cpdax.com/v1/orders",
-                              headers=self.headers('POST', '/v1/orders/'),
-                              data={'type': 'limit', 'side': 'buy',
-                                    'product_id': str(cur).upper()+"-KRW",
-                                    'size': size, 'price': str(int(self.price[cur])),'funds':str(int(self.price[cur]))})
-            print(json.dumps({'type': 'limit', 'side': 'buy',
-                                    'product_id': str(cur).upper()+"-KRW",
-                                    'size': size, 'price': str(int(self.price[cur])),'funds':str(int(self.price[cur]))}))
+                              headers=self.headers('POST', '/v1/orders/', json.dumps(body)),
+                              data=body)
+            print(json.dumps(body))
             print(r.text)
             r=r.json()
             return {
@@ -78,8 +78,8 @@ class Cpdax():
 
     def sell_coin(self, cur, amount):
         print('cpdax sell_coin %f' % amount)
-        r = requests.post("https://api.cpdax.com/v1/orders", headers=self.headers('POST', '/v1/orders'),
-                          data={'type': 'market', 'side': 'sell', 'product_id': str(cur).upper() + "-KRW", 'size': str(amount)}).json()
+        body={'type': 'market', 'side': 'sell', 'product_id': str(cur).upper() + "-KRW", 'size': str(amount)}
+        r = requests.post("https://api.cpdax.com/v1/orders", headers=self.headers('POST', '/v1/orders',json.dumps(body)),data=body).json()
 
 def get_cpdax_price(api):
     while True:
@@ -99,7 +99,7 @@ def get_cpdax_price(api):
 
 def get_cpdax_balance(api):
     while True:
-        r = requests.get('https://api.cpdax.com/v1/balance', headers=api.headers('GET', '/v1/balance')).json()
+        r = requests.get('https://api.cpdax.com/v1/balance', headers=api.headers('GET', '/v1/balance','')).json()
         for item in r:
             api.balance[str.lower(item['currency'])] = item['total']
         time.sleep(5)
