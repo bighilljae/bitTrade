@@ -87,11 +87,13 @@ def get_cpdax_price(api):
         if r.status_code != requests.codes.ok:
             return
         # TODO cpdax API 확인
-        order = {'btc': 2, 'bch': 1, 'eth': 8, 'etc': 6, 'ltc': 14, 'eos': 4}
-
+        li = r.json()
         res = {}
-        for cur in order:
-            res[cur] = float(r.json()[order[cur]]['bid'])
+        for i in range(0, len(li)):
+            if li[i]['currency_pair'].endswith('KRW'):
+                cur = str.lower(li[i]['currency_pair'][0:3])
+                res[cur] = float(li[i]['last'])
+
         api.price = res
         time.sleep(5)
 
