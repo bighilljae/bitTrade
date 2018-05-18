@@ -87,17 +87,19 @@ def get_cpdax_price(api):
         if r.status_code != requests.codes.ok:
             return
         # TODO cpdax API 확인
-        order = {'btc': 2, 'bch': 1, 'eth': 8, 'etc': 6, 'ltc': 14, 'eos': 4}
-
+        li = r.json()
         res = {}
-        for cur in order:
-            res[cur] = float(r.json()[order[cur]]['bid'])
+        for i in range(0, len(li)):
+            if li[i]['currency_pair'].endswith('KRW'):
+                cur = str.lower(li[i]['currency_pair'][0:3])
+                res[cur] = float(li[i]['last'])
+
         api.price = res
         time.sleep(5)
 
 def get_cpdax_balance(api):
     while True:
-        r = requests.get('https://api.cpdax.com/v1/balance', headers=api.headers('GET', '/v1/balance').json()
+        r = requests.get('https://api.cpdax.com/v1/balance', headers=api.headers('GET', '/v1/balance')).json()
         for item in r:
             api.balance[str.lower(item['currency'])] = item['total']
         time.sleep(5)
