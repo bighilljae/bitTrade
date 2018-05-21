@@ -22,11 +22,17 @@ function get_history() {
 }
 
 function get_balance(){
-    currencies = ['krw', 'btc', 'bch', 'etc', 'eth', 'ltc'];
+    currencies = [];
     $.get('/exchangekrw/', function(res){
         res = JSON.parse(res);
         for( cen in res ){
             $('.'+cen + ' .balance_number').text(parseInt(res[cen].get2));
+
+            for( r in res[cen] ){
+                if( r != 'get2' && !(r in currencies)){
+                    currencies.append(r);
+                }
+            }
         }
 
         for( cur in currencies ){
@@ -36,7 +42,12 @@ function get_balance(){
                     val = val + parseFloat(res[cen][currencies[cur]]);
                 }
             }
-            $('.accs td.'+currencies[cur]).text(val);
+            if( cur == 'krw') {
+                $('.accs td.' + currencies[cur]).text(val);
+            }
+            else{
+                $('.accs tbody').append(`<tr><td>${cur}</td><td>${val}</td></tr>`);
+            }
         }
     });
 }
