@@ -52,10 +52,13 @@ def exchange():
     exchange_krw = {}
     exchange_krw['coinone'] = api_coinone.balance
     exchange_krw['coinone']['get2'] = str(get2(api_coinone))
+
     exchange_krw['korbit'] = api_korbit.balance
     exchange_krw['korbit']['get2'] = get2(api_korbit)
-    exchange_krw['cpdax'] = api_coinone.balance
+
+    exchange_krw['cpdax'] = api_cpdax.balance
     exchange_krw['cpdax']['get2'] = get2(api_cpdax)
+
     exchange_krw['bithumb'] = api_bithumb.balance
     exchange_krw['bithumb']['get2'] = get2(api_bithumb)
     print(json.dumps(exchange_krw))

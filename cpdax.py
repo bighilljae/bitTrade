@@ -1,4 +1,5 @@
 import time
+import calendar
 import requests
 import hmac
 import hashlib
@@ -6,6 +7,7 @@ import base64
 import json
 import threading
 import traceback
+import subprocess
 
 class Cpdax():
     price = {}
@@ -18,10 +20,9 @@ class Cpdax():
         self.run_worker()
 
     def headers(self, method, endpoint,body):
-        t = str(int(time.time()))
+        t = str(calendar.timegm(time.gmtime()))
         msg = self.api_key + t + method + endpoint + body
-        print(msg)
-        h = hmac.new(self.secret_key.encode('utf-8'), msg.encode('utf-8'), hashlib.sha256).hexdigest()
+        h = hmac.new(str.encode(self.secret_key), str.encode(msg), hashlib.sha256).hexdigest()
         h64 = h
         return {
             'CP-ACCESS-KEY': self.api_key,
@@ -34,6 +35,19 @@ class Cpdax():
         return self.price
 
     def run_worker(self):
+        r = requests.get("https://api.cpdax.com/v1/tickers/detailed")
+        if r.status_code != requests.codes.ok:
+            return
+        # TODO cpdax API 확인
+        li = r.json()
+        res = {}
+        for i in range(0, len(li)):
+            if li[i]['currency_pair'].endswith('KRW'):
+                cur = str.lower(li[i]['currency_pair'][0:3])
+                res[cur] = float(li[i]['last'])
+
+        self.price = res
+
         p_thread = threading.Thread(target=get_cpdax_price, args=(self,))
         p_thread.daemon = True
         p_thread.start()
@@ -45,23 +59,23 @@ class Cpdax():
         # Pre check doned
 
     def buy_coin(self, cur, amount, account):
-        if round(amount / self.price[cur], 4) < account:
-            size = str(round(amount / self.price[cur], 4))
-        else:
-            size = str(round(account, 4))
-        print('cpdax buy_coin %f' % round(amount / self.price[cur], 4))
         try:
-            if float(size) == 0:
-                raise Exception('Size Error')
+            if round(amount / self.price[cur], 4) < account:
+                size = str(round(amount / self.price[cur], 4))
+            else:
+                size = str(round(account, 4))
+            print('cpdax buy_coin %f' % round(amount / self.price[cur], 4))
+
             body = {'type': 'limit', 'side': 'buy',
                                     'product_id': str(cur).upper()+"-KRW",
-                                    'size': size, 'price': str(int(self.price[cur])),'funds':'0000'}
+                                    'size': size, 'price': str(int(self.price[cur]))}
             r = requests.post("https://api.cpdax.com/v1/orders",
                               headers=self.headers('POST', '/v1/orders/', json.dumps(body)),
-                              data=body)
+                              data=json.dumps(body))
+
             print(json.dumps(body))
             print(r.text)
-            r=r.json()
+            r = r.json()
             return {
                 'units': r['filled_size'],
                 'price': r['price']
@@ -79,7 +93,8 @@ class Cpdax():
     def sell_coin(self, cur, amount):
         print('cpdax sell_coin %f' % amount)
         body={'type': 'market', 'side': 'sell', 'product_id': str(cur).upper() + "-KRW", 'size': str(amount)}
-        r = requests.post("https://api.cpdax.com/v1/orders", headers=self.headers('POST', '/v1/orders',json.dumps(body)),data=body).json()
+        r = requests.post("https://api.cpdax.com/v1/orders", headers=self.headers('POST', '/v1/orders',json.dumps(body)),data=json.dumps(body)).json()
+        print(json.dumps(r))
 
 def get_cpdax_price(api):
     while True:

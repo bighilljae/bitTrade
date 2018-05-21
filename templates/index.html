@@ -32,7 +32,7 @@
             </div>
             <div class="option">
                 <div class="alarm checkbox">
-                  <label><input type="checkbox" checked>Alarm</label>
+                  <label><input type="checkbox">Alarm</label>
                 </div>
                 <div class="trade checkbox">
                   <label><input type="checkbox">Trade</label>
@@ -65,17 +65,7 @@
                 <tbody class="recent_trade">
                 </tbody>
             </table>
-            <table class="history table table-condensed">
-                <thead>
-                    <td>BUY</td>
-                    <td>SELL</td>
-                    <td>Cur</td>
-                    <td>amount</td>
-                </thead>
-                <tbody class="trade_history"></tbody>
-            </table>
-        </div>
-        <div class="accounts">
+            <div class="accounts" style="float:right">
             <table class="accs table">
                 <thead>
                     <td>CUR</td>
@@ -84,13 +74,18 @@
                 <tbody>
                 <tr>
                     <td>KRW</td><td class="krw"></td>
-                    </tr>
-                    <tr><td><img class="icon" src="/static/images/ic_btc_symbol.svg">btc</td><td class="btc"></td></tr>
-                    <tr><td><img class="icon" src="/static/images/ic_bch_symbol.svg">bch</td><td class="bch"></td></tr>
-                    <tr><td><img class="icon" src="/static/images/ic_etc_symbol.svg">etc</td><td class="etc"></td></tr>
-                    <tr><td><img class="icon" src="/static/images/ic_eth_symbol.svg">eth</td><td class="eth"></td></tr>
-                    <tr><td><img class="icon" src="/static/images/ic_ltc_symbol.svg">ltc</td><td class="ltc"></td></tr>
+                </tr>
                 </tbody>
+            </table>
+        </div>
+            <table class="history table table-condensed">
+                <thead>
+                    <td>BUY</td>
+                    <td>SELL</td>
+                    <td>Cur</td>
+                    <td>amount</td>
+                </thead>
+                <tbody class="trade_history"></tbody>
             </table>
         </div>
     </div>
