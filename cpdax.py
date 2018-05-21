@@ -20,7 +20,6 @@ class Cpdax():
     def headers(self, method, endpoint,body):
         t = str(int(time.time()))
         msg = self.api_key + t + method + endpoint + body
-        print(msg)
         h = hmac.new(self.secret_key.encode('utf-8'), msg.encode('utf-8'), hashlib.sha256).hexdigest()
         h64 = h
         return {
@@ -55,12 +54,11 @@ class Cpdax():
                 raise Exception('Size Error')
             body = {'type': 'limit', 'side': 'buy',
                                     'product_id': str(cur).upper()+"-KRW",
-                                    'size': size, 'price': str(int(self.price[cur])),'funds':'0000'}
+                                    'size': size, 'price': str(int(self.price[cur]))}
             r = requests.post("https://api.cpdax.com/v1/orders",
                               headers=self.headers('POST', '/v1/orders/', json.dumps(body)),
                               data=body)
             print(json.dumps(body))
-            print(r.text)
             r=r.json()
             return {
                 'units': r['filled_size'],

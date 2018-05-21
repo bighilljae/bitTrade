@@ -18,6 +18,8 @@ class Alarm:
 
     def message(self):
         if self.lastMessage is None or datetime.datetime.now() > self.lastMessage + datetime.timedelta(minutes=self.minutes) and self.msg != '':
+            if len(self.msg) <= 0:
+                return
             self.lastMessage = datetime.datetime.now()
             print('message %s' % self.msg)
             self.bot.sendMessage(chat_id=self.id, text=self.msg)

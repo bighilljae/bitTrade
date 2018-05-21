@@ -93,7 +93,7 @@ class Korbit():
             'price': str(int(self.price[cur])),
             'coin_amount': size,
             'fiat_amount': None,
-            'nonce': self.nonce
+            'nonce': str(int(time.time()*1000)) 
         }
         try:
             if float(size) == 0 :
