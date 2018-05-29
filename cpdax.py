@@ -1,13 +1,11 @@
 import time
-import calendar
 import requests
 import hmac
 import hashlib
-import base64
 import json
 import threading
 import traceback
-import subprocess
+import urllib
 
 class Cpdax():
     price = {}
@@ -19,17 +17,15 @@ class Cpdax():
         self.secret_key = secret
         self.run_worker()
 
-    def headers(self, method, endpoint,body):
-        t = str(calendar.timegm(time.gmtime()))
-        msg = self.api_key + t + method + endpoint + body
+    def headers(self, method, endpoint, body):
+        t = str(int(time.time()))
+        msg = self.api_key + "" + t + "" + method + "" + endpoint + body
         h = hmac.new(str.encode(self.secret_key), str.encode(msg), hashlib.sha256).hexdigest()
-        h64 = h
         return {
             'CP-ACCESS-KEY': self.api_key,
             'CP-ACCESS-TIMESTAMP': t,
-            'CP-ACCESS-DIGEST': str(h64),
-            'Content-Type': 'application/json',
-            'Accept': '*/*'}
+            'CP-ACCESS-DIGEST': h,
+            'Content-Type': 'application/json'}
 
     def bid(self):
         return self.price
@@ -69,13 +65,29 @@ class Cpdax():
             body = {'type': 'limit', 'side': 'buy',
                                     'product_id': str(cur).upper()+"-KRW",
                                     'size': size, 'price': str(int(self.price[cur]))}
-            r = requests.post("https://api.cpdax.com/v1/orders",
-                              headers=self.headers('POST', '/v1/orders/', json.dumps(body)),
-                              data=json.dumps(body))
+            bdt = json.dumps(body).replace(" ", "")
+            #r = requests.post("https://api.cpdax.com/v1/orders",
+            #                  headers=self.headers('POST', '/v1/orders/', bdt),
+            #                  data=bdt)
+            #ret = urllib.request.urlopen(urllib.request.Request("https://api.cpdax.com/v1/orders",
+            #                                                    str.encode(json.dumps(body)),
+            #                                                    self.headers('POST', '/v1/orders/', bdt)))
 
-            print(json.dumps(body))
-            print(r.text)
-            r = r.json()
+            cp_access_timestamp = str(int(time.time()))
+            digest_string = self.api_key + "" + str(cp_access_timestamp) + "POST" + "/v1/orders"
+            digest_string = digest_string + json.dumps(body).replace(" ", "")
+            cp_access_digest = hmac.new(str.encode(self.secret_key), str.encode(digest_string), hashlib.sha256).hexdigest()
+            headers = {
+                'CP-ACCESS-KEY': self.api_key,
+                'CP-ACCESS-TIMESTAMP': cp_access_timestamp,
+                'CP-ACCESS-DIGEST': cp_access_digest,
+                'Content-Type': 'application/json'
+            }
+            ret = urllib.request.urlopen(urllib.request.Request("https://api.cpdax.com/v1/orders", str.encode(json.dumps(body)), headers))
+
+            r = json.loads(ret.read().decode())
+            print(bdt)
+            print(json.dumps(r))
             return {
                 'units': r['filled_size'],
                 'price': r['price']
