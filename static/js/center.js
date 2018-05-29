@@ -22,15 +22,15 @@ function get_history() {
 }
 
 function get_balance(){
-    currencies = [];
     $.get('/exchangekrw/', function(res){
         res = JSON.parse(res);
+        currencies = [];
         for( cen in res ){
             $('.'+cen + ' .balance_number').text(parseInt(res[cen].get2));
 
             for( r in res[cen] ){
                 if( r != 'get2' && !(r in currencies)){
-                    currencies.append(r);
+                    currencies.push(r);
                 }
             }
         }
