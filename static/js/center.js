@@ -23,13 +23,14 @@ function get_history() {
 
 function get_balance(){
     $.get('/exchangekrw/', function(res){
+        $('.accs tbody').empty();
         res = JSON.parse(res);
         currencies = [];
         for( cen in res ){
             $('.'+cen + ' .balance_number').text(parseInt(res[cen].get2));
 
             for( r in res[cen] ){
-                if( r != 'get2' && !(r in currencies)){
+                if( r != 'get2' && currencies.indexOf(r) == -1 ){
                     currencies.push(r);
                 }
             }
@@ -45,8 +46,11 @@ function get_balance(){
             if( cur == 'krw') {
                 $('.accs td.' + currencies[cur]).text(val);
             }
+			else if( val == 0 ){
+				continue;
+			}
             else{
-                $('.accs tbody').append(`<tr><td>${cur}</td><td>${val}</td></tr>`);
+                $('.accs tbody').append(`<tr><td>${currencies[cur]}</td><td>${val.toString().substring(0, 15)}</td></tr>`);
             }
         }
     });

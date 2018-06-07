@@ -70,13 +70,17 @@ class Coinone:
         except:
             return {
                 'units': 0,
-                'price': 0
+                'price': 0,
+                'error': True
             }
 
     # Pre check doned
     def sell_coin(self, cur, amount):
         # r = self.secret_api("/trade/market_sell", {'currency': str(cur).upper(), 'units': amount}).json()
-        self.secret_api("/v2/order/limit_sell/", price=str(int(self.price[cur])), qty=str(amount), currency=cur)
+        r = self.secret_api("/v2/order/limit_sell/", price=str(int(self.price[cur])), qty=str(amount), currency=cur)
+        if r.status_code != requests.codes.ok:
+            return {'price': 0, 'units': 0, 'error': True}
+        return r.json()
 
 
     def run_worker(self):

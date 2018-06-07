@@ -18,11 +18,12 @@ api_korbit = Korbit(KORBIT_KEY, KORBIT_SECRET, KORBIT_USERNAME, KORBIT_PWD)
 api_cpdax = Cpdax(CPDAX_KEY, CPDAX_SECRET)
 api_coinone = Coinone(COINONE_KEY, COINONE_SECRET)
 trade_history = []
+last_trade = None
 
 app_settings = {
     'alarm': False,
     'trade': False,
-    'label': 'btg,eos',
+    'label': 'btc',
     'threshold': 1.5,
     'alarm_thres': 0.6,
     'order': 100000
@@ -66,6 +67,7 @@ def exchange():
 
 @app.route('/bid/')
 def bid():
+    global last_trade
     global trade_history
     market = {}
     market['coinone'] = api_coinone.bid()
@@ -84,25 +86,39 @@ def bid():
         if len(u[cur].keys()) < 2:
             del u[cur]
             continue
-        if cur in app_settings['label'].split(','):
+        if cur not in app_settings['label'].split(','):
             continue
         m1, c1 = max(u[cur])
         m2, c2 = min(u[cur])
-        if m1 / m2 > 1+app_settings['alarm_thres']/100 and app_settings['alarm'] is True and not cur in app_settings['label'].split(','):
+        if m1 / m2 > 1+app_settings['alarm_thres']/100 and app_settings['alarm'] is True and cur in app_settings['label'].split(','):
             bot.add(cur, m1 / m2)
-        if m1 / m2 > (1+app_settings['threshold']/100) and app_settings['trade'] is True:
+        if last_trade is not None and datetime.datetime.now().minute == last_trade.minute:
+            continue
+        if m1 / m2 > (1+app_settings['threshold']/100) and app_settings['trade'] is True :
+            last_trade = datetime.datetime.now()
+            trade_amount = int(app_settings['order']) / c2api(c1).price[cur]
+            if float(c2api(c2).balance[bur]) < trade_amount:
+                bot.add('not enough crypto currency', None)
+                print('not enough crypto currency')
+# bot.message()
             r = c2api(c2).buy_coin(cur, app_settings['order'], float(c2api(c1).balance[cur]))
-            if r['units'] > 0:
-                c2api(c1).sell_coin(cur, r['units'])
+            print(json.dumps(r))
+            if float(r['units']) > 0:
+                sell_res = c2api(c1).sell_coin(cur, float(r['units']))
+                print(json.dumps(sell_res))
                 trade_history.insert(0, {'buy': c2api(c2).__class__.__name__,
                                            'sell': c2api(c1).__class__.__name__,
                                             'cur': cur,
-                                           'amount': r['units']})
+                                           'amount': r['units'],
+                                           'time': datetime.datetime.now().strftime('%m-%d %H:%M')})
+                st = 'Trade Done ' + c2api(c2).__class__.__name__ + ' ' + c2api(c1).__class__.__name__
+                print(st)
+                bot.add(st, None)
+                bot.message(True)
+
             if len(trade_history) > 10:
                 trade_history = trade_history[:10]
-            print('Trade Done ' + c2api(c2).__class__.__name__ + ' ' + c2api(c1).__class__.__name__)
-            app_settings['trade'] = False
-
+           
     if app_settings['alarm'] is True:
         bot.message()
 
@@ -242,9 +258,45 @@ def run_bid():
             except:
                 pass
 
+def test():
+    r = api_bithumb.buy_coin('btc', 10000, 100000)
+    if 'error' in r:
+        print('bithumb buy error' + json.dumps(r))
+        return
+    r = api_bithumb.sell_coin('btc', float(r['units']))
+    if 'error' in r:
+        print('bithumb sell error' + json.dumps(r))
+        return
+
+    r = api_korbit.buy_coin('btc', 10000, 100000)
+    if 'error' in r:
+        print('korbit buy error' + json.dumps(r))
+        return
+    r = api_korbit.sell_coin('btc', float(r['units']))
+    if 'error' in r:
+        print('korbit sell error' + json.dumps(r))
+        return
+
+    r = api_coinone.buy_coin('btc', 10000, 100000)
+    if 'error' in r:
+        print('coinone buy error' + json.dumps(r))
+        return
+    r = api_coinone.sell_coin('btc', float(r['units']))
+    if 'error' in r:
+        print('coinone sell error' + json.dumps(r))   
+        return
+    r = api_cpdax.buy_coin('btc', 10000, 100000)
+    if 'error' in r:
+        print('cpdax buy error' + json.dumps(r))
+        return
+    r = api_cpadx.sell_coin('btc', float(r['units']))
+    if 'error' in r:
+        print('cpdax sell error' + json.dumps(r))
+        return
+
 if __name__ == '__main__':
     b_thread = threading.Thread(target=run_bid)
     b_thread.daemon = True
     b_thread.start()
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=8080)
 

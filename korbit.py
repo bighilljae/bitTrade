@@ -28,7 +28,7 @@ class Korbit():
             self.refresh_token()
         return {
             'Accept': 'application/json',
-            'Authorization': self.token['token_type'] + ' ' + self.token['access_token']
+            'Authorization': "{} {}".format(self.token['token_type'],self.token['access_token'])
         }
 
     def create_token(self):
@@ -98,10 +98,9 @@ class Korbit():
         try:
             if float(size) == 0 :
                 raise Exception('Size error')
-            r = requests.post("https://api.korbit.co.kr/v1/user/orders/buy", headers=self.headers,
-                              data=payload)
-            print(r.status_code)
-            print(r.text)
+            print('korbit buy %f' % amount)
+            r = requests.post("https://api.korbit.co.kr/v1/user/orders/buy", headers=self.headers, data=payload)
+
             r = r.json()
             return {
                 'units': size,
@@ -118,8 +117,11 @@ class Korbit():
 
     def sell_coin(self, cur, amount):
         print('korbit sell %f' % amount)
-        r = requests.post("https://api.cpdax.com/v1/orders", headers=self.headers,
-                          data={'type': 'market', 'side': 'sell', 'product_id': str(cur).upper() + "-KRW", 'size': str(amount)}).json()
+        r = requests.post("https://api.korbit.co.kr/v1/user/orders/sell", headers=self.headers,
+                          data={'type': 'market', 'currency_pair': str(cur)+"_krw", 'coin_amount': amount, 'nonce': str(int(time.time()*1000))})
+        if r.status_code != requests.codes.ok:
+            return {'units': 0, 'price': 0, 'error': True}
+        return r.json()
 
 def get_korbit_balance(api):
     while True:

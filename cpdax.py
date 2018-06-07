@@ -85,7 +85,7 @@ class Cpdax():
             }
             ret = urllib.request.urlopen(urllib.request.Request("https://api.cpdax.com/v1/orders", str.encode(json.dumps(body)), headers))
 
-           r = json.loads(ret.read().decode())
+            r = json.loads(ret.read().decode())
             print(bdt)
             print(json.dumps(r))
             return {
@@ -105,8 +105,10 @@ class Cpdax():
     def sell_coin(self, cur, amount):
         print('cpdax sell_coin %f' % amount)
         body={'type': 'market', 'side': 'sell', 'product_id': str(cur).upper() + "-KRW", 'size': str(amount)}
-        r = requests.post("https://api.cpdax.com/v1/orders", headers=self.headers('POST', '/v1/orders',json.dumps(body)),data=json.dumps(body)).json()
-        print(json.dumps(r))
+        r = requests.post("https://api.cpdax.com/v1/orders", headers=self.headers('POST', '/v1/orders',json.dumps(body)),data=json.dumps(body))
+        if r.status_code != requests.codes.of:
+            return {'error': True}
+        return r.json()
 
 def get_cpdax_price(api):
     while True:

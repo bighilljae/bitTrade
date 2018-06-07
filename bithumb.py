@@ -13,6 +13,7 @@ import urllib.parse
 import requests
 import json
 import threading
+import traceback
 
 
 class Bithumb:
@@ -78,19 +79,27 @@ class Bithumb:
             if float(units) == 0:
                 raise Exception('size Error')
             r = self.secret_api("/trade/place", order_currency=str(cur).upper(), units=units, price=str(int(self.price[cur])), type='bid').json()
+            print(json.dumps(r))
+            print(json.dumps(r['data']))
             return {
                 'units': r['units'],
                 'price': r['price']
             }
-        except:
+        except Exception as e:
+            print(e)
+            print(traceback.format_exc())
             return {
                 'units': 0,
-                'price': 0
+                'price': 0,
+                'error': True
             }
 
     # Pre check doned
     def sell_coin(self, cur, amount):
-        r = self.secret_api("/trade/market_sell",  currency=str(cur).upper(), units=str(amount)).json()
+        r = self.secret_api("/trade/market_sell",  currency=str(cur).upper(), units=str(amount))
+        if r.status_code != requests.codes.ok:
+            return {'units': 0, 'price': 0, 'error': True}
+        return r.json()
 
 def get_bithumb_balance(api):
     while True:
