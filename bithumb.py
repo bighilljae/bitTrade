@@ -81,10 +81,13 @@ class Bithumb:
             r = self.secret_api("/trade/place", order_currency=str(cur).upper(), units=units, price=str(int(self.price[cur])), type='bid').json()
             print(json.dumps(r))
             print(json.dumps(r['data']))
-            return {
-                'units': r['units'],
-                'price': r['price']
-            }
+            if int(r['status']) == 0:
+                return {
+                    'units': units,
+                    'price': self.price[cur]
+                }
+            else:
+                raise Exception('http error')
         except Exception as e:
             print(e)
             print(traceback.format_exc())

@@ -97,7 +97,7 @@ def bid():
         if m1 / m2 > (1+app_settings['threshold']/100) and app_settings['trade'] is True :
             last_trade = datetime.datetime.now()
             trade_amount = int(app_settings['order']) / c2api(c1).price[cur]
-            if float(c2api(c2).balance[bur]) < trade_amount:
+            if float(c2api(c2).balance[cur]) < trade_amount:
                 bot.add('not enough crypto currency', None)
                 print('not enough crypto currency')
 # bot.message()
@@ -289,7 +289,7 @@ def test():
     if 'error' in r:
         print('cpdax buy error' + json.dumps(r))
         return
-    r = api_cpadx.sell_coin('btc', float(r['units']))
+    r = api_cpdax.sell_coin('btc', float(r['units']))
     if 'error' in r:
         print('cpdax sell error' + json.dumps(r))
         return
