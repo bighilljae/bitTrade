@@ -12,6 +12,7 @@ class Korbit():
     password = ''
     price = {}
     balance = {}
+    name = "korbit"
     def __init__(self, key, secret, name, pwd):
         self.api_key = key
         self.secret_key = secret

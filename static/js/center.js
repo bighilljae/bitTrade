@@ -63,7 +63,11 @@ function get_bid(){
         $('table.contents tbody').empty();
         for(cur in res){
             $tr = $('table.contents tbody').append('<tr>');
-            $tr.append(`<td>${cur}</td><td class="korbit"></td><td class="coinone"></td><td class="bithumb"></td><td class="cpdax"></td><td class="per"></td>`);
+            $tr.append(`<td>${cur}</td>`);
+            for( c in global_cen ){
+                $tr.append(`<td class="${global_cen[c]}"></td>`)
+            }
+            $tr.append(`<td class="per"></td>`);
             var min = 9999999999;
             var max = 0;
             for(cen in res[cur]){

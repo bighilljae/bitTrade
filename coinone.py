@@ -18,6 +18,7 @@ class Coinone:
     secret_key = ''
     price = {}
     balance = {}
+    name = "coinone"
     def __init__(self, key, secret):
         self.api_key = key
         self.secret_key = secret

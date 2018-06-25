@@ -12,6 +12,8 @@ class Cpdax():
     balance = {}
     api_key = ''
     secret_key = ''
+    name = "cpdax"
+
     def __init__(self, key, secret):
         self.api_key = key
         self.secret_key = secret

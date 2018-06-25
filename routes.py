@@ -3,6 +3,7 @@ from coinone import Coinone
 from bithumb import Bithumb
 from korbit import Korbit
 from cpdax import Cpdax
+from gopax import Gopax
 from alarm import Alarm
 import threading
 import requests
@@ -13,10 +14,12 @@ from auth import *
 
 app = Flask(__name__)
 bot = Alarm(5)
-api_bithumb = Bithumb(BITHUMB_KEY, BITHUMB_SECRET)
-api_korbit = Korbit(KORBIT_KEY, KORBIT_SECRET, KORBIT_USERNAME, KORBIT_PWD)
-api_cpdax = Cpdax(CPDAX_KEY, CPDAX_SECRET)
-api_coinone = Coinone(COINONE_KEY, COINONE_SECRET)
+apis = []
+apis.append(Bithumb(BITHUMB_KEY, BITHUMB_SECRET))
+apis.append(Korbit(KORBIT_KEY, KORBIT_SECRET, KORBIT_USERNAME, KORBIT_PWD))
+apis.append(Coinone(COINONE_KEY, COINONE_SECRET))
+apis.append(Gopax(GOPAX_KEY, GOPAX_SECRET))
+# aps.append(Cpdax(CPDAX_KEY, CPDAX_SECRET))
 trade_history = []
 last_trade = None
 
@@ -29,19 +32,10 @@ app_settings = {
     'order': 100000
 }
 
-@app.route('/hello/')
-def api_root():
-    recent_price = {}
-    recent_price['korbit'] = korbit_get(requests.get("https://api.korbit.co.kr/v1/transactions?currency_pair=btc_krw"))
-    recent_price['bithumb'] = bithumb_get(requests.get("https://api.bithumb.com/public/recent_transactions/BTC"))
-    recent_price['cpdax'] = cpdax_get(requests.get("https://api.cpdax.com/v1/trades/BTC-KRW?limit=20"))
-    recent_price['coinone'] = coinone_get(requests.get("https://api.coinone.co.kr/trades/?currency=BTC"))
-    return json.dumps(recent_price)
-
 
 @app.route('/')
 def home():
-    return render_template('index.html')
+    return render_template('index.html', api_list=list(map(lambda ap: ap.name, apis)))
 
 @app.route('/history')
 def history():
@@ -51,17 +45,9 @@ def history():
 def exchange():
     # change to api_price
     exchange_krw = {}
-    exchange_krw['coinone'] = api_coinone.balance
-    exchange_krw['coinone']['get2'] = str(get2(api_coinone))
-
-    exchange_krw['korbit'] = api_korbit.balance
-    exchange_krw['korbit']['get2'] = get2(api_korbit)
-
-    exchange_krw['cpdax'] = api_cpdax.balance
-    exchange_krw['cpdax']['get2'] = get2(api_cpdax)
-
-    exchange_krw['bithumb'] = api_bithumb.balance
-    exchange_krw['bithumb']['get2'] = get2(api_bithumb)
+    for api in apis:
+        exchange_krw[api.name] = api.balance
+        exchange_krw[api.name]['get2'] = get2(api)
     print(json.dumps(exchange_krw))
     return json.dumps(exchange_krw)
 
@@ -70,10 +56,9 @@ def bid():
     global last_trade
     global trade_history
     market = {}
-    market['coinone'] = api_coinone.bid()
-    market['korbit'] = api_korbit.bid()
-    market['cpdax'] = api_cpdax.bid()
-    market['bithumb'] = api_bithumb.bid()
+    for api in apis:
+        market[api.name] = api.bid()
+
     u = {}
     for cen in market:
         for cur in market[cen]:
@@ -106,12 +91,12 @@ def bid():
             if float(r['units']) > 0:
                 sell_res = c2api(c1).sell_coin(cur, float(r['units']))
                 print(json.dumps(sell_res))
-                trade_history.insert(0, {'buy': c2api(c2).__class__.__name__,
-                                           'sell': c2api(c1).__class__.__name__,
+                trade_history.insert(0, {'buy': c2api(c2).name,
+                                           'sell': c2api(c1).name,
                                             'cur': cur,
                                            'amount': r['units'],
                                            'time': datetime.datetime.now().strftime('%m-%d %H:%M')})
-                st = 'Trade Done ' + c2api(c2).__class__.__name__ + ' ' + c2api(c1).__class__.__name__
+                st = 'Trade Done ' + c2api(c2).name + ' ' + c2api(c1).name
                 print(st)
                 bot.add(st, None)
                 bot.message(True)
@@ -127,14 +112,9 @@ def bid():
     return json.dumps(u)
 
 def c2api(c):
-    if c == 'coinone':
-        return api_coinone
-    if c == 'korbit':
-        return api_korbit
-    if c == 'cpdax':
-        return api_cpdax
-    if c == 'bithumb':
-        return api_bithumb
+    for api in apis:
+        if api.name == c:
+            return api
 
 @app.route('/save')
 def saveSetting():
@@ -193,44 +173,6 @@ def max(li):
     return m, c
 
 
-def korbit_get(r):
-    if r.status_code != requests.codes.ok:
-        return
-    ar = []
-    js = r.json()
-    for i in range(20):
-        ar.append({'price': js[i]['price'], 'amount': js[i]['amount']})
-    return ar
-
-def bithumb_get(r):
-    if r.status_code != requests.codes.ok:
-        return
-    js = r.json()['data']
-    ar = []
-    for i in range(20):
-        ar.append({'price': js[i]['price'], 'amount': js[i]['units_traded']})
-    return ar
-
-def cpdax_get(r):
-    if r.status_code != requests.codes.ok:
-        return
-    js = r.json()
-    ar = []
-    for i in range(20):
-        ar.append({'price': js[i]['price'], 'amount': js[i]['size']})
-    return ar
-
-
-def coinone_get(r):
-    if r.status_code != requests.codes.ok:
-        return
-    js = r.json()['completeOrders']
-    ar = []
-    for i in range(1, 21):
-        ar.append({'price': js[-i]['price'], 'amount': js[-i]['qty']})
-    return ar
-
-
 def get2(api):
     price = api.price
     balance = api.balance
@@ -246,7 +188,7 @@ def get2(api):
             sum += float(price[key]) * float(balance[key])
         except:
             pass
-    return sum
+    return str(sum)
 
 
 def run_bid():
@@ -259,40 +201,16 @@ def run_bid():
                 pass
 
 def test():
-    r = api_bithumb.buy_coin('btc', 10000, 100000)
-    if 'error' in r:
-        print('bithumb buy error' + json.dumps(r))
-        return
-    r = api_bithumb.sell_coin('btc', float(r['units']))
-    if 'error' in r:
-        print('bithumb sell error' + json.dumps(r))
-        return
+    for api in apis:
+        r = api.buy_coin('btc', 10000, 100000)
+        if 'error' in r:
+            print(api.name + ' buy error' + json.dumps(r))
+            return
+        r = api.sell_coin('btc', float(r['units']))
+        if 'error' in r:
+            print(api.name + ' sell error' + json.dumps(r))
+            return
 
-    r = api_korbit.buy_coin('btc', 10000, 100000)
-    if 'error' in r:
-        print('korbit buy error' + json.dumps(r))
-        return
-    r = api_korbit.sell_coin('btc', float(r['units']))
-    if 'error' in r:
-        print('korbit sell error' + json.dumps(r))
-        return
-
-    r = api_coinone.buy_coin('btc', 10000, 100000)
-    if 'error' in r:
-        print('coinone buy error' + json.dumps(r))
-        return
-    r = api_coinone.sell_coin('btc', float(r['units']))
-    if 'error' in r:
-        print('coinone sell error' + json.dumps(r))   
-        return
-    r = api_cpdax.buy_coin('btc', 10000, 100000)
-    if 'error' in r:
-        print('cpdax buy error' + json.dumps(r))
-        return
-    r = api_cpdax.sell_coin('btc', float(r['units']))
-    if 'error' in r:
-        print('cpdax sell error' + json.dumps(r))
-        return
 
 if __name__ == '__main__':
     b_thread = threading.Thread(target=run_bid)

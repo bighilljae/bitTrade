@@ -20,6 +20,7 @@ class Bithumb:
     api_url = "https://api.bithumb.com"
     api_key = ""
     api_secret = ""
+    name = "bithumb"
     price = {}
     balance = {}
 
